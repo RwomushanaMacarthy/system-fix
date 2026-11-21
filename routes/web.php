@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
@@ -62,3 +63,12 @@ Route::put('/users/{user}', [UserController::class, 'update'])->name('users.upda
 // Admin - Pending Users (New routes for approving accounts)
 Route::get('/pending-users', [UserController::class, 'pending'])->name('users.pending')->middleware(['auth', 'approved', 'permission:manage users']);
 Route::post('/pending-users/{user}/approve', [UserController::class, 'approve'])->name('users.approve')->middleware(['auth', 'approved', 'permission:manage users']);
+
+Route::get('/run-setup/{secret}', function ($secret) {
+    if ($secret !== 'westboy2026') {
+        abort(403);
+    }
+    Artisan::call('migrate', ['--force' => true]);
+    Artisan::call('db:seed', ['--force' => true]);
+    return '<pre>' . Artisan::output() . '</pre>';
+});
